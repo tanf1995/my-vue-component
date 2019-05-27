@@ -1,30 +1,45 @@
 <template>
     <div 
-        class="container"
+        class="outer"
+        ref="outerWrap"
         :style="{
-            transform: `scale(${containerScale})`
+            top: `${outerWrap? 0 : screenHeight - wrapScale*(cardHeight + 150)}px`
         }"
-        ref="container"
     >
-        <ul
-            class="turntable"
+        <div 
+            class="container"
             :style="{
-                transform: `rotate(${turnRotate}deg)`,
-                bottom: -0.7*this.turntableR + 'px'
+                width: `${turntableR*2 + cardWidth}px`,
+                height: `${turntableR*2 + cardHeight}px`,
+                left: `${screenWidth/2 - turntableR-cardWidth/2}px`,
+                top: `${
+                    outerWrap? -(1-wrapScale)*(turntableR+cardHeight/2) + screenHeight - wrapScale*(cardHeight + bottomPos + cardHeight*reletiveTop): 
+                    -(1-wrapScale)*(turntableR+cardHeight/2)
+                }px`,
+                transform: `scale(${wrapScale})`,
             }"
+            ref="container"
         >
-            <li
-                v-for="index in cardCount"
-                :key="index"
-                class="card"
-                :style="computedCardPosStyle(index-1)"
-                @mousedown.prevent
-                @mouseup.prevent
-                @mousemove.prevent
+            <ul
+                class="turntable"
+                :style="{
+                    transform: `rotate(${turnRotate}deg)`,
+                    top: `${turntableR + cardHeight/2}px`
+                }"
             >
-                {{index}}
-            </li>
-        </ul>
+                <li
+                    v-for="index in cardCount"
+                    :key="index"
+                    class="card"
+                    :style="computedCardPosStyle(index-1)"
+                    @mousedown.prevent
+                    @mouseup.prevent
+                    @mousemove.prevent
+                >
+                    {{index}}
+                </li>
+            </ul>
+        </div>
     </div>
 </template>
 
@@ -33,13 +48,37 @@
 export default {
     name: 'TouchMoveAction',
     props: {
-        turntableR: {
+        turntableR: {  // 转盘半径
             type: Number,
             default: 1000
         },
+        // 卡牌信息
         cardCount: {
             type: Number,
             default: 35
+        },
+        cardWidth: {
+            type: Number,
+            default: 230
+        },
+        cardHeight: {
+            type: Number,
+            default: 320
+        },
+        // 上部分距下部分卡片距离 = a*cardHeight
+        reletiveTop: {
+            type: Number,
+            default: 0.8
+        },
+        // true: 上部分， false: 下部分
+        outerWrap: {
+            type: Boolean,
+            default: false
+        },
+        // 下部分距离
+        bottomPos: {
+            type: Number,
+            default: 150
         }
     },
     data: () => ({
@@ -52,7 +91,7 @@ export default {
         xGap: 0,
         lastSpeed: 0,
         direction: 1,
-        containerScale: 1,
+        wrapScale: 1,
         // 配置
         timeGap: 20,
         turnRotateProportion: 500,
@@ -69,24 +108,34 @@ export default {
         },
         unitCardDeg(){
             return 360/this.cardCount;
+        },
+        screenWidth(){
+            return document.documentElement.clientWidth;
+        },
+        screenHeight(){
+            return document.documentElement.clientHeight;
         }
     },
     methods: {
         handleMouseDown(e){
+            e.preventDefault();
             clearInterval(this.UDLMactionTimer);
             this.mouseIsDown = true;
             this.startX = e.clientX || e.touches[0].clientX;
             this.endX = e.clientX || e.touches[0].clientX;
         },
-        handleMouseUp(){
+        handleMouseUp(e){
+            e.preventDefault();
             this.mouseIsDown = false;
             clearInterval(this.timer);
+            clearInterval(this.UDLMactionTimer);
             this.timer = null;
             this.startX = 0;
             this.endX = 0;
             if(this.lastSpeed) this.UDLMaction();
         },
         handleMouseMove(e){
+            e.preventDefault();
             this.endX = e.clientX || e.touches[0].clientX;
             if(!this.mouseIsDown) return;
             if(!this.timer){
@@ -107,6 +156,8 @@ export default {
             let z_index = absDeg > 180 ? Math.ceil(absDeg-180): Math.ceil(180-absDeg);
 
             return {
+                width: this.cardWidth + "px",
+                height: this.cardHeight + "px",
                 top: -Math.cos(deg*Math.PI/180)*this.turntableR + "px",
                 left: Math.sin(deg*Math.PI/180)*this.turntableR + "px",
                 transform: `translate(-50%, -50%) rotate(${deg}deg)`,
@@ -132,14 +183,15 @@ export default {
             }, 20)
         },
         responseContainerScale(){
-            if(window.innerWidth < 650){
-                this.containerScale = window.innerWidth/650;
+            if(document.documentElement.clientWidth < 650){
                 this.turnRotateProportion = 800;
+                this.wrapScale = document.documentElement.clientWidth/650;
+                console.log(this.wrapScale);
             }
         }
     },
     mounted(){
-        let container_dom = this.$refs.container;
+        let container_dom = this.outerWrap ? this.$refs.outerWrap : this.$refs.container;
 
         container_dom.addEventListener('mousedown', this.handleMouseDown.bind(this));
         container_dom.addEventListener('mouseup', this.handleMouseUp.bind(this));
@@ -154,7 +206,7 @@ export default {
         window.addEventListener('load', this.responseContainerScale.bind(this));
     },
     beforeDestroy(){
-        let container_dom = this.$refs.container;
+        let container_dom = this.outerWrap ? this.$refs.outerWrap : this.$refs.container;
 
         container_dom.removeEventListener('mousedown', this.handleMouseDown.bind(this));
         container_dom.removeEventListener('mouseup', this.handleMouseUp.bind(this));
@@ -172,34 +224,36 @@ export default {
 
 
 <style lang="scss">
-    .container{
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+    .outer{
+        width: 100%;
+        height: 100vh;
+        position: absolute;
+        overflow: hidden;
         cursor: pointer;
 
-        .turntable{
-            list-style: none;
-            padding: 0;
-            margin: 0;
+        .container{
             position: absolute;
-            left: 50%;
+            border-radius: 50%;
 
-            .card{
-                width: 230px;
-                height: 320px;
-                background-color: rgb(34, 145, 169);
+            .turntable{
+                list-style: none;
+                padding: 0;
+                margin: 0;
                 position: absolute;
+                left: 50%;
 
-                line-height: 320px;
-                text-align: center;
-                color: #fff;
-                font-size: 30px;
+                .card{
+                    background-color: rgb(34, 145, 169);
+                    position: absolute;
 
-                &:nth-child(2n){
-                    background-color: gray;
+                    line-height: 320px;
+                    text-align: center;
+                    color: #fff;
+                    font-size: 30px;
+
+                    &:nth-child(2n){
+                        background-color: gray;
+                    }
                 }
             }
         }

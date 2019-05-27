@@ -1,29 +1,10 @@
-# my-components
+# vue组件
 
-## Project setup
-```
-yarn install
-```
+### 转盘选择器 - TouchMoreAction.vue
 
-### Compiles and hot-reloads for development
-```
-yarn run serve
-```
+![turntable](./screenshots/turntable.png)
 
-### Compiles and minifies for production
-```
-yarn run build
-```
 
-### Run your tests
-```
-yarn run test
-```
+# CMD
 
-### Lints and fixes files
-```
-yarn run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+运行： vue serve

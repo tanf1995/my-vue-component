@@ -1,7 +1,8 @@
 <template>
     <div id="app">
         <!--<LearnCom />-->
-        <TouchMoveAction />
+        <!-- <TouchMoveAction /> -->
+        <TouchMoveActionDouble />
     </div>
 </template>
 
@@ -10,7 +11,8 @@ export default {
     name: 'app',
     components: {
         // LearnCom: () => import('./components/LearnCom'),
-        TouchMoveAction: () => import('./components/TouchMoveAction'),
+        // TouchMoveAction: () => import('./components/TouchMoveAction'),
+        TouchMoveActionDouble: () => import('./components/TouchMoveActionDouble'),
     }
 }
 </script>
