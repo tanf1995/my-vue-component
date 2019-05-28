@@ -186,7 +186,7 @@ export default {
             if(document.documentElement.clientWidth < 650){
                 this.turnRotateProportion = 800;
                 this.wrapScale = document.documentElement.clientWidth/650;
-                console.log(this.wrapScale);
+                window.console.log(this.wrapScale);
             }
         }
     },

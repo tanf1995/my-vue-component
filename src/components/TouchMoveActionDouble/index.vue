@@ -1,7 +1,10 @@
 <template>
     <div class="wrap">
-        <TouchMoveAction :outerWrap="true" />
-        <TouchMoveAction></TouchMoveAction>
+        <TouchMoveAction 
+            :outerWrap="true"
+        />
+
+        <TouchMoveAction />
     </div>
 </template>
 
@@ -12,7 +15,12 @@
 export default {
     name: 'TouchMoveActionDouble',
     components: {
-        TouchMoveAction: () => import('./components/TouchMoveAction'),
+        TouchMoveAction: () => import('./components/TouchMoveAction')
+    },
+    methods: {
+        renderItem(){
+            return <CardItem />
+        }
     }
 }
 </script>
