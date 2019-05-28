@@ -50,12 +50,12 @@ export default {
     props: {
         turntableR: {  // 转盘半径
             type: Number,
-            default: 1000
+            default: 1200
         },
         // 卡牌信息
         cardCount: {
             type: Number,
-            default: 35
+            default: 38
         },
         cardWidth: {
             type: Number,
